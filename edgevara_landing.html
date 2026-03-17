@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EdgeVara — The Trading OS for Serious Traders</title>
+<meta name="description" content="EdgeVara is the all-in-one trading journal, analytics platform, psychology engine, and personal finance system built for serious retail and prop firm traders.">
+<meta property="og:title" content="EdgeVara — The Trading OS for Serious Traders">
+<meta property="og:description" content="Trade journal, analytics, psychology, habits, finance — one platform.">
+<meta property="og:url" content="https://edgevara.io">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090C;--s1:#0C0F14;--s2:#10141B;--s3:#151C26;--s4:#1C2535;
+  --b1:rgba(255,255,255,0.055);--b2:rgba(255,255,255,0.1);--b3:rgba(255,255,255,0.16);
+  --t1:#F2F6FF;--t2:#8C9CB8;--t3:#3D4E68;
+  --lime:#B8FF3C;--limeA:rgba(184,255,60,0.07);--limeB:rgba(184,255,60,0.14);
+  --profit:#00E5C3;--profitA:rgba(0,229,195,0.08);
+  --loss:#FF5E5E;--amber:#FFB224;--blue:#4D9EFF;--blueA:rgba(77,158,255,0.08);
+  --purple:#9B7FFF;
+  --f:'DM Sans',sans-serif;--m:'Space Mono',monospace;--serif:'Instrument Serif',serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);font-family:var(--f);color:var(--t1);min-height:100vh;overflow-x:hidden;cursor:none;}
+
+/* CURSOR */
+.cursor{position:fixed;width:8px;height:8px;border-radius:50%;background:var(--lime);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference;}
+.cursor-ring{position:fixed;width:32px;height:32px;border-radius:50%;border:1px solid rgba(184,255,60,0.4);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all 0.14s ease;}
+
+/* GRAIN */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:0.45;pointer-events:none;z-index:0;}
+
+/* GLOWS */
+.glows{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.g1{position:absolute;top:-300px;left:50%;transform:translateX(-50%);width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(184,255,60,0.032),transparent 65%);animation:g1a 9s ease-in-out infinite;}
+.g2{position:absolute;bottom:-300px;right:-200px;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,195,0.038),transparent 65%);animation:g2a 11s ease-in-out infinite;}
+.g3{position:absolute;top:35%;left:-150px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(77,158,255,0.028),transparent 65%);animation:g3a 13s ease-in-out infinite;}
+@keyframes g1a{0%,100%{opacity:0.7;transform:translateX(-50%) scale(1);}50%{opacity:1;transform:translateX(-50%) scale(1.08);}}
+@keyframes g2a{0%,100%{opacity:0.6;}50%{opacity:1;transform:scale(1.12);}}
+@keyframes g3a{0%,100%{opacity:0.5;}50%{opacity:1;transform:scale(1.1);}}
+
+/* GRID */
+.grid{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(ellipse 75% 70% at 50% 40%,black,transparent);}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(7,9,12,0.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--b1);animation:fadeDown 0.7s ease both;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+
+/* LOGO */
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-mark{width:32px;height:32px;border-radius:8px;background:var(--lime);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.logo-mark::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.2),transparent);}
+.logo-mark svg{width:17px;height:17px;stroke:#07090C;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1;}
+.logo-wordmark{display:flex;align-items:baseline;gap:0;}
+.logo-edge{font-family:var(--serif);font-size:19px;color:var(--t1);letter-spacing:-0.01em;}
+.logo-vara{font-family:var(--serif);font-style:italic;font-size:19px;color:var(--lime);letter-spacing:-0.01em;}
+
+.nav-links{display:flex;gap:32px;}
+.nav-links a{font-size:13px;color:var(--t3);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover{color:var(--t1);}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-login{font-size:13px;color:var(--t2);cursor:pointer;padding:6px 14px;border-radius:7px;transition:color 0.2s;text-decoration:none;}
+.nav-login:hover{color:var(--t1);}
+.nav-cta{display:flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;background:var(--lime);color:#07090C;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.18s;border:none;font-family:var(--f);}
+.nav-cta:hover{background:#c8ff4a;transform:translateY(-1px);}
+
+/* ── HERO ── */
+.hero{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px 60px;text-align:center;}
+
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:20px;background:var(--limeA);border:1px solid rgba(184,255,60,0.18);font-family:var(--m);font-size:10px;color:var(--lime);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:32px;animation:fadeUp 0.8s 0.2s ease both;}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--lime);animation:blink 2.4s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.15;}}
+
+/* HERO TITLE — split wordmark treatment */
+.hero-title-wrap{margin-bottom:28px;animation:fadeUp 0.8s 0.3s ease both;}
+.hero-t1{font-family:var(--serif);font-size:clamp(52px,8vw,96px);line-height:1.0;letter-spacing:-0.03em;color:var(--t1);display:block;}
+.hero-t2{font-family:var(--serif);font-style:italic;font-size:clamp(52px,8vw,96px);line-height:1.0;letter-spacing:-0.03em;display:block;}
+.hero-t2 .ev-edge{color:var(--t2);}
+.hero-t2 .ev-vara{color:var(--lime);}
+
+.hero-p{font-size:clamp(14px,1.8vw,17px);color:var(--t2);max-width:520px;line-height:1.75;margin-bottom:44px;animation:fadeUp 0.8s 0.42s ease both;}
+.hero-p strong{color:var(--t1);font-weight:500;}
+
+.cta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.8s 0.52s ease both;margin-bottom:52px;}
+.cta-main{display:flex;align-items:center;gap:7px;padding:13px 26px;border-radius:9px;background:var(--lime);color:#07090C;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:all 0.2s;border:none;font-family:var(--f);}
+.cta-main:hover{background:#c8ff4a;transform:translateY(-2px);box-shadow:0 16px 48px rgba(184,255,60,0.2);}
+.cta-main svg{width:14px;height:14px;stroke:#07090C;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.cta-ghost{display:flex;align-items:center;gap:7px;padding:13px 22px;border-radius:9px;border:1px solid var(--b2);color:var(--t2);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;transition:all 0.18s;font-family:var(--f);}
+.cta-ghost:hover{border-color:var(--b3);color:var(--t1);}
+.cta-ghost svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+
+.proof-row{display:flex;align-items:center;gap:14px;justify-content:center;flex-wrap:wrap;animation:fadeUp 0.8s 0.62s ease both;}
+.proof-avs{display:flex;}
+.proof-av{width:26px;height:26px;border-radius:50%;border:2px solid var(--bg);margin-left:-7px;background:var(--s3);display:flex;align-items:center;justify-content:center;}
+.proof-av:first-child{margin-left:0;}
+.proof-av svg{width:13px;height:13px;stroke:var(--t3);fill:none;stroke-width:2;stroke-linecap:round;}
+.proof-sep{width:1px;height:14px;background:var(--b1);}
+.proof-txt{font-size:12px;color:var(--t3);}
+.proof-txt strong{color:var(--t1);font-weight:500;}
+.proof-stars{display:flex;gap:2px;}
+.proof-stars svg{width:11px;height:11px;fill:var(--amber);stroke:none;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── PREVIEW ── */
+.preview-wrap{position:relative;z-index:2;padding:0 28px 100px;max-width:1080px;margin:0 auto;animation:fadeUp 1s 0.8s ease both;}
+.preview-eyebrow{text-align:center;font-family:var(--m);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.preview-eyebrow::before,.preview-eyebrow::after{content:'';flex:0 0 48px;height:1px;background:var(--b1);}
+.preview-shell{border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,0.055),0 40px 100px rgba(0,0,0,0.8);background:var(--s1);}
+.preview-titlebar{display:flex;align-items:center;gap:6px;padding:12px 18px;background:var(--s2);border-bottom:1px solid var(--b1);}
+.ptb-dot{width:10px;height:10px;border-radius:50%;}
+.ptb-addr{flex:1;margin:0 14px;background:rgba(0,0,0,0.3);border-radius:5px;padding:5px 12px;font-family:var(--m);font-size:10px;color:var(--t3);display:flex;align-items:center;gap:6px;}
+.ptb-secure{width:6px;height:6px;border-radius:50%;background:var(--profit);}
+.preview-body{display:grid;grid-template-columns:58px 1fr 256px;min-height:340px;}
+
+/* MINI APP SIDEBAR */
+.app-sb{background:var(--s2);border-right:1px solid var(--b1);padding:12px 8px;display:flex;flex-direction:column;gap:4px;align-items:center;}
+.app-logo-mini{width:32px;height:32px;border-radius:7px;background:var(--lime);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.app-logo-mini svg{width:15px;height:15px;stroke:#07090C;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.app-nav{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;}
+.app-nav svg{width:15px;height:15px;stroke:var(--t3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.app-nav.active{background:var(--limeA);}
+.app-nav.active svg{stroke:var(--lime);}
+.app-nav.active::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:2px;border-radius:0 2px 2px 0;background:var(--lime);}
+
+/* MINI APP MAIN */
+.app-main{padding:16px 18px;display:flex;flex-direction:column;gap:10px;}
+.app-topbar{display:flex;align-items:center;justify-content:space-between;}
+.app-title{font-size:13px;font-weight:600;color:var(--t1);}
+.app-meta{display:flex;align-items:center;gap:6px;}
+.app-date{font-family:var(--m);font-size:8px;color:var(--t3);background:var(--s2);padding:3px 8px;border-radius:4px;}
+.app-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.app-kpi{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px 10px;}
+.app-kpi-l{font-size:8px;color:var(--t3);margin-bottom:3px;font-family:var(--m);letter-spacing:0.06em;text-transform:uppercase;}
+.app-kpi-v{font-family:var(--m);font-size:15px;font-weight:700;line-height:1;}
+.app-chart{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:10px;flex:1;}
+.app-chart svg{width:100%;height:80px;}
+.app-trades{display:flex;flex-direction:column;gap:4px;}
+.app-tr{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;background:var(--s2);border:1px solid var(--b1);}
+.app-tr-accent{width:2px;height:24px;border-radius:1px;flex-shrink:0;}
+.app-tr-info{flex:1;}
+.app-tr-sym{font-family:var(--m);font-size:9px;font-weight:700;color:var(--t1);margin-bottom:1px;}
+.app-tr-meta{font-size:8px;color:var(--t3);}
+.app-tr-pnl{font-family:var(--m);font-size:10px;font-weight:700;flex-shrink:0;}
+
+/* MINI APP RIGHT */
+.app-right{background:var(--s2);border-left:1px solid var(--b1);padding:14px 12px;display:flex;flex-direction:column;gap:12px;}
+.app-r-lbl{font-family:var(--m);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px;}
+.app-score{display:flex;align-items:center;gap:8px;}
+.app-mini-stats{display:flex;flex-direction:column;gap:4px;}
+.app-ms-row{display:flex;justify-content:space-between;align-items:center;}
+.app-ms-l{font-size:8px;color:var(--t3);}
+.app-ms-v{font-family:var(--m);font-size:9px;font-weight:700;}
+.app-prog{height:2px;background:var(--s3);border-radius:1px;overflow:hidden;margin-top:2px;}
+.app-prog-fill{height:100%;border-radius:1px;}
+
+/* ── FEATURES ── */
+.features-wrap{position:relative;z-index:2;padding:80px 28px;max-width:1080px;margin:0 auto;}
+.sec-label{text-align:center;font-family:var(--m);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--lime);margin-bottom:14px;}
+.sec-title{text-align:center;font-family:var(--serif);font-size:clamp(34px,5vw,52px);letter-spacing:-0.025em;color:var(--t1);line-height:1.1;margin-bottom:14px;}
+.sec-title em{font-style:italic;color:var(--t2);}
+.sec-sub{text-align:center;font-size:14px;color:var(--t3);max-width:480px;margin:0 auto 56px;line-height:1.75;}
+
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:16px;overflow:hidden;}
+.feat-cell{background:var(--s1);padding:28px 26px;transition:background 0.2s;cursor:default;}
+.feat-cell:hover{background:var(--s2);}
+.feat-cell.wide{grid-column:span 2;}
+.fc-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;border:1px solid;}
+.fc-icon svg{width:18px;height:18px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.fc-name{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:8px;letter-spacing:-0.01em;}
+.fc-body{font-size:12px;color:var(--t3);line-height:1.72;}
+.fc-pill{display:inline-flex;align-items:center;gap:5px;margin-top:14px;font-family:var(--m);font-size:9px;padding:3px 9px;border-radius:4px;letter-spacing:0.04em;}
+.fc-pill svg{width:8px;height:8px;fill:none;stroke-width:3;stroke-linecap:round;}
+
+/* ── STATS ── */
+.stats-band{position:relative;z-index:2;border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);background:linear-gradient(135deg,rgba(184,255,60,0.025),transparent,rgba(0,229,195,0.018));padding:64px 28px;margin:40px 0;}
+.stats-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:0;}
+.stat-item{text-align:center;padding:16px 20px;border-right:1px solid var(--b1);}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-family:var(--serif);font-size:clamp(38px,5vw,58px);color:var(--t1);letter-spacing:-0.03em;line-height:1;margin-bottom:6px;}
+.stat-num span{color:var(--lime);}
+.stat-label{font-size:12px;color:var(--t3);}
+
+/* ── PRICING ── */
+.pricing-wrap{position:relative;z-index:2;padding:80px 28px;max-width:1000px;margin:0 auto;}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:56px;}
+.plan{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:28px;display:flex;flex-direction:column;transition:all 0.2s;}
+.plan:hover{transform:translateY(-2px);}
+.plan.featured{border-color:rgba(184,255,60,0.25);background:linear-gradient(160deg,rgba(184,255,60,0.06),var(--s1) 60%);position:relative;}
+.plan-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--lime);color:#07090C;font-family:var(--m);font-size:9px;font-weight:700;padding:3px 12px;border-radius:10px;letter-spacing:0.06em;white-space:nowrap;}
+.plan-tier{font-family:var(--m);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;}
+.plan-price{font-family:var(--serif);font-size:48px;letter-spacing:-0.03em;color:var(--t1);line-height:1;margin-bottom:4px;}
+.plan-price sup{font-size:22px;vertical-align:top;margin-top:10px;display:inline-block;color:var(--t3);}
+.plan-cadence{font-size:11px;color:var(--t3);margin-bottom:18px;}
+.plan-hr{height:1px;background:var(--b1);margin-bottom:18px;}
+.plan-feats{display:flex;flex-direction:column;gap:9px;margin-bottom:24px;flex:1;}
+.pf{display:flex;align-items:center;gap:9px;font-size:12px;}
+.pf.yes{color:var(--t2);}
+.pf.no{color:var(--t3);}
+.pf-mark{width:16px;height:16px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.pf-mark svg{width:9px;height:9px;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+.pf-mark.yes{background:rgba(0,229,195,0.1);}
+.pf-mark.yes svg{stroke:var(--profit);}
+.pf-mark.no{background:var(--s3);}
+.pf-mark.no svg{stroke:var(--t3);}
+.plan-btn{width:100%;padding:12px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--f);transition:all 0.18s;letter-spacing:0.01em;}
+.plan-btn.free-btn{background:var(--s2);color:var(--t2);border:1px solid var(--b2);}
+.plan-btn.free-btn:hover{color:var(--t1);border-color:var(--b3);}
+.plan-btn.pro-btn{background:var(--lime);color:#07090C;}
+.plan-btn.pro-btn:hover{background:#c8ff4a;}
+.plan-btn.elite-btn{background:transparent;color:var(--t1);border:1px solid rgba(184,255,60,0.2);}
+.plan-btn.elite-btn:hover{background:var(--limeA);}
+
+/* ── WAITLIST ── */
+.waitlist-wrap{position:relative;z-index:2;padding:80px 28px 120px;}
+.waitlist-box{max-width:600px;margin:0 auto;text-align:center;background:linear-gradient(160deg,rgba(184,255,60,0.055),rgba(0,229,195,0.02),var(--s1));border:1px solid rgba(184,255,60,0.15);border-radius:20px;padding:52px 44px;position:relative;overflow:hidden;}
+.waitlist-box::before{content:'';position:absolute;top:-100px;right:-100px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(184,255,60,0.06),transparent 70%);pointer-events:none;}
+.wl-title{font-family:var(--serif);font-size:clamp(28px,4vw,40px);letter-spacing:-0.02em;color:var(--t1);margin-bottom:12px;line-height:1.2;}
+.wl-sub{font-size:14px;color:var(--t3);margin-bottom:30px;line-height:1.7;max-width:400px;margin-left:auto;margin-right:auto;}
+.wl-sub strong{color:var(--lime);font-weight:500;}
+.wl-form{display:flex;gap:8px;max-width:440px;margin:0 auto 14px;}
+.wl-email{flex:1;background:rgba(0,0,0,0.35);border:1px solid var(--b2);border-radius:9px;padding:12px 16px;font-size:13px;color:var(--t1);font-family:var(--f);outline:none;transition:border-color 0.2s;}
+.wl-email:focus{border-color:rgba(184,255,60,0.4);}
+.wl-email::placeholder{color:var(--t3);}
+.wl-submit{padding:12px 22px;border-radius:9px;background:var(--lime);color:#07090C;font-weight:700;font-size:13px;border:none;cursor:pointer;font-family:var(--f);white-space:nowrap;transition:all 0.18s;}
+.wl-submit:hover{background:#c8ff4a;}
+.wl-fine{font-size:11px;color:var(--t3);}
+.wl-fine strong{color:rgba(184,255,60,0.65);font-weight:400;}
+.wl-success{display:none;margin-top:14px;padding:13px 18px;border-radius:9px;background:var(--profitA);border:1px solid rgba(0,229,195,0.2);font-size:13px;color:var(--profit);align-items:center;justify-content:center;gap:7px;}
+.wl-success.show{display:flex;}
+.wl-success svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;}
+
+/* ── FOOTER ── */
+footer{position:relative;z-index:2;border-top:1px solid var(--b1);padding:28px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.footer-mark{width:24px;height:24px;border-radius:6px;background:var(--lime);display:flex;align-items:center;justify-content:center;}
+.footer-mark svg{width:12px;height:12px;stroke:#07090C;fill:none;stroke-width:2.5;stroke-linecap:round;}
+.footer-edge{font-family:var(--serif);font-size:16px;color:var(--t2);}
+.footer-vara{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--lime);}
+.footer-links{display:flex;gap:22px;}
+.footer-links a{font-size:12px;color:var(--t3);text-decoration:none;transition:color 0.2s;}
+.footer-links a:hover{color:var(--t2);}
+.footer-copy{font-family:var(--m);font-size:10px;color:var(--t3);}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.65s ease,transform 0.65s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* MOBILE */
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .nav-links{display:none;}
+  .feat-grid{grid-template-columns:1fr;}
+  .feat-cell.wide{grid-column:span 1;}
+  .pricing-grid{grid-template-columns:1fr;}
+  .stats-inner{grid-template-columns:1fr 1fr;}
+  .stat-item:nth-child(2){border-right:none;}
+  .preview-body{grid-template-columns:1fr;}
+  .app-sb,.app-right{display:none;}
+  .wl-form{flex-direction:column;}
+  footer{flex-direction:column;text-align:center;padding:24px 20px;}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cur"></div>
+<div class="cursor-ring" id="ring"></div>
+<div class="glows"><div class="g1"></div><div class="g2"></div><div class="g3"></div></div>
+<div class="grid"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    </div>
+    <div class="logo-wordmark">
+      <span class="logo-edge">Edge</span><span class="logo-vara">Vara</span>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#waitlist">Early Access</a>
+  </div>
+  <div class="nav-right">
+    <a href="#waitlist" class="nav-login">Sign in</a>
+    <a href="#waitlist" class="nav-cta">Get Early Access</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><div class="badge-dot"></div>Now in Private Beta</div>
+  <div class="hero-title-wrap">
+    <span class="hero-t1">The Trading OS</span>
+    <span class="hero-t2">for <span class="ev-edge">Edge</span><span class="ev-vara">Vara</span> traders.</span>
+  </div>
+  <p class="hero-p">
+    <strong>Trade journal. Analytics. Psychology. Habits. Finance.</strong> Every module connected, every insight earned. Built for traders who run their craft like a business.
+  </p>
+  <div class="cta-row">
+    <a href="#waitlist" class="cta-main">
+      <svg viewBox="0 0 24 24"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+      Get Early Access
+    </a>
+    <a href="#features" class="cta-ghost">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+      See What's Inside
+    </a>
+  </div>
+  <div class="proof-row">
+    <div class="proof-avs">
+      <div class="proof-av" style="background:#1C2535;"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="proof-av" style="background:#151C26;"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="proof-av" style="background:#1C2535;"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="proof-av" style="background:#151C26;"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="proof-av" style="background:#1C2535;"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    </div>
+    <span class="proof-txt"><strong>240+ traders</strong> on the waitlist</span>
+    <div class="proof-sep"></div>
+    <div class="proof-stars">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <span class="proof-txt" style="font-size:11px;">Beta feedback</span>
+  </div>
+</section>
+
+<!-- PREVIEW -->
+<div class="preview-wrap reveal">
+  <div class="preview-eyebrow">Live Dashboard Preview</div>
+  <div class="preview-shell">
+    <div class="preview-titlebar">
+      <div class="ptb-dot" style="background:#FF5F57;"></div>
+      <div class="ptb-dot" style="background:#FFBD2E;"></div>
+      <div class="ptb-dot" style="background:#28CA41;"></div>
+      <div class="ptb-addr">
+        <div class="ptb-secure"></div>
+        app.edgevara.io / dashboard
+      </div>
+    </div>
+    <div class="preview-body">
+      <div class="app-sb">
+        <div class="app-logo-mini">
+          <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
+        <div class="app-nav active">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div class="app-nav">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="app-nav">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="app-nav">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="app-nav">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="app-nav" style="margin-top:auto;">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        </div>
+      </div>
+      <div class="app-main">
+        <div class="app-topbar">
+          <div class="app-title">Performance Hub</div>
+          <div class="app-meta">
+            <div class="app-date">MAR 15, 2026</div>
+          </div>
+        </div>
+        <div class="app-kpis">
+          <div class="app-kpi"><div class="app-kpi-l">Net P&L MTD</div><div class="app-kpi-v" style="color:#00E5C3;">+$9,680</div></div>
+          <div class="app-kpi"><div class="app-kpi-l">Win Rate</div><div class="app-kpi-v" style="color:#B8FF3C;">74%</div></div>
+          <div class="app-kpi"><div class="app-kpi-l">Profit Factor</div><div class="app-kpi-v" style="color:#FFB224;">1.94</div></div>
+        </div>
+        <div class="app-chart">
+          <svg viewBox="0 0 380 70" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(0,229,195,0.25)"/>
+                <stop offset="100%" stop-color="rgba(0,229,195,0)"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="35" x2="380" y2="35" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <path d="M0,62 C25,58 50,50 80,44 C110,38 135,42 165,33 C195,24 220,18 250,12 C280,6 310,5 340,4 C360,3 370,3 380,2 L380,70 L0,70 Z" fill="url(#cg)"/>
+            <path d="M0,62 C25,58 50,50 80,44 C110,38 135,42 165,33 C195,24 220,18 250,12 C280,6 310,5 340,4 C360,3 370,3 380,2" fill="none" stroke="#00E5C3" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="app-trades">
+          <div class="app-tr"><div class="app-tr-accent" style="background:#00E5C3;"></div><div class="app-tr-info"><div class="app-tr-sym">EURUSD</div><div class="app-tr-meta">Long · London · 9:15 AM</div></div><div class="app-tr-pnl" style="color:#00E5C3;">+$680</div></div>
+          <div class="app-tr"><div class="app-tr-accent" style="background:#B8FF3C;"></div><div class="app-tr-info"><div class="app-tr-sym">NAS100</div><div class="app-tr-meta">Long · NY Open · 2:30 PM</div></div><div class="app-tr-pnl" style="color:#B8FF3C;">+$9,000</div></div>
+          <div class="app-tr"><div class="app-tr-accent" style="background:#FF5E5E;"></div><div class="app-tr-info"><div class="app-tr-sym">XAUUSD</div><div class="app-tr-meta">Short · London · 11:00 AM</div></div><div class="app-tr-pnl" style="color:#FF5E5E;">-$420</div></div>
+        </div>
+      </div>
+      <div class="app-right">
+        <div>
+          <div class="app-r-lbl">Mental Score</div>
+          <div class="app-score">
+            <svg width="44" height="44" viewBox="0 0 44 44">
+              <circle cx="22" cy="22" r="16" fill="none" stroke="rgba(184,255,60,0.12)" stroke-width="5"/>
+              <circle cx="22" cy="22" r="16" fill="none" stroke="#B8FF3C" stroke-width="5" stroke-dasharray="100.5" stroke-dashoffset="18.1" stroke-linecap="round" transform="rotate(-90 22 22)"/>
+              <text x="22" y="26" font-family="Space Mono" font-size="9" font-weight="700" fill="#B8FF3C" text-anchor="middle">82</text>
+            </svg>
+            <div class="app-mini-stats">
+              <div class="app-ms-row"><span class="app-ms-l">Sleep</span><span class="app-ms-v" style="color:#6366F1;">8h 15m</span></div>
+              <div class="app-ms-row"><span class="app-ms-l">Stress</span><span class="app-ms-v" style="color:#B8FF3C;">Low</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="app-r-lbl">Rule Compliance</div>
+          <div style="font-family:var(--m);font-size:15px;font-weight:700;color:#B8FF3C;margin-bottom:4px;">91%</div>
+          <div class="app-prog"><div class="app-prog-fill" style="width:91%;background:#B8FF3C;"></div></div>
+        </div>
+        <div>
+          <div class="app-r-lbl">FTMO Challenge</div>
+          <div style="font-family:var(--m);font-size:12px;font-weight:700;color:#4D9EFF;margin-bottom:4px;">6.2% / 10%</div>
+          <div class="app-prog"><div class="app-prog-fill" style="width:62%;background:#4D9EFF;"></div></div>
+          <div style="font-size:8px;color:var(--t3);margin-top:4px;">12 days remaining</div>
+        </div>
+        <div>
+          <div class="app-r-lbl">Net Worth</div>
+          <div style="font-family:var(--m);font-size:14px;font-weight:700;color:#F2F6FF;">$28,400</div>
+          <div style="font-size:8px;color:#00E5C3;margin-top:2px;">↑ +$1,840 this month</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features-wrap" id="features">
+  <div class="sec-label">Everything You Need</div>
+  <h2 class="sec-title">One platform. Every edge.<br><em>Nothing left out.</em></h2>
+  <p class="sec-sub">Every module is connected. Sleep affects psychology. Psychology affects trades. EdgeVara reads all of it and shows you the pattern.</p>
+  <div class="feat-grid reveal">
+    <div class="feat-cell">
+      <div class="fc-icon" style="background:rgba(0,229,195,0.08);border-color:rgba(0,229,195,0.15);">
+        <svg viewBox="0 0 24 24" stroke="#00E5C3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <div class="fc-name">Trade Journal & Analytics</div>
+      <div class="fc-body">Log every trade with screenshots, setups, and psychology notes. Deep analytics reveal your edge by session, pair, mood, and strategy — automatically.</div>
+      <div class="fc-pill" style="background:rgba(0,229,195,0.08);color:#00E5C3;border:1px solid rgba(0,229,195,0.15);">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Core Feature
+      </div>
+    </div>
+    <div class="feat-cell">
+      <div class="fc-icon" style="background:rgba(155,127,255,0.08);border-color:rgba(155,127,255,0.15);">
+        <svg viewBox="0 0 24 24" stroke="#9B7FFF"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="fc-name">Psychology & Mental Tracking</div>
+      <div class="fc-body">Daily mood check-ins, sleep tracking, stress recovery tools, and the mood-to-win-rate correlation chart. AI coach reads your data and tells you what's actually happening.</div>
+    </div>
+    <div class="feat-cell">
+      <div class="fc-icon" style="background:rgba(184,255,60,0.07);border-color:rgba(184,255,60,0.15);">
+        <svg viewBox="0 0 24 24" stroke="#B8FF3C"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="fc-name">Pre-Trade Rule Gate</div>
+      <div class="fc-body">A mandatory compliance checklist that fires before every trade is saved. Cannot be bypassed. Every violation logged automatically. Your discipline, enforced by the system.</div>
+      <div class="fc-pill" style="background:rgba(184,255,60,0.07);color:#B8FF3C;border:1px solid rgba(184,255,60,0.15);">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Unique to EdgeVara
+      </div>
+    </div>
+    <div class="feat-cell wide">
+      <div class="fc-icon" style="background:rgba(77,158,255,0.08);border-color:rgba(77,158,255,0.15);">
+        <svg viewBox="0 0 24 24" stroke="#4D9EFF"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="fc-name">Prop Firm Dashboard</div>
+      <div class="fc-body">Live meters for profit target, daily loss limit, and max drawdown. Automatic alerts before you breach any rule. Supports FTMO, The5ers, MyForexFunds, E8, and any firm — fully configurable.</div>
+    </div>
+    <div class="feat-cell">
+      <div class="fc-icon" style="background:rgba(255,178,36,0.08);border-color:rgba(255,178,36,0.15);">
+        <svg viewBox="0 0 24 24" stroke="#FFB224"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="fc-name">Habit Tracker</div>
+      <div class="fc-body">GitHub-style activity heatmaps, streak counters, and the habit-to-win-rate correlation chart. See exactly which daily habits move the needle on your performance.</div>
+    </div>
+    <div class="feat-cell">
+      <div class="fc-icon" style="background:rgba(184,255,60,0.07);border-color:rgba(184,255,60,0.15);">
+        <svg viewBox="0 0 24 24" stroke="#B8FF3C"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="fc-name">Personal Finance Engine</div>
+      <div class="fc-body">Track all income streams — trading P&L, freelance, salary. Budget categories, savings goals, net worth tracker, full cashflow dashboard. Your money, complete picture.</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-band reveal">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-num">7<span>+</span></div><div class="stat-label">Integrated modules</div></div>
+    <div class="stat-item"><div class="stat-num">240<span>+</span></div><div class="stat-label">Traders on waitlist</div></div>
+    <div class="stat-item"><div class="stat-num">$0</div><div class="stat-label">To get started free</div></div>
+    <div class="stat-item"><div class="stat-num">1<span>st</span></div><div class="stat-label">Of its kind in Africa</div></div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section class="pricing-wrap" id="pricing">
+  <div class="sec-label">Simple Pricing</div>
+  <h2 class="sec-title">Start free.<br><em>Scale when you're ready.</em></h2>
+  <p class="sec-sub">No credit card required. No lock-in. Cancel anytime.</p>
+  <div class="pricing-grid">
+    <div class="plan reveal">
+      <div class="plan-tier">Free</div>
+      <div class="plan-price"><sup>$</sup>0</div>
+      <div class="plan-cadence">Forever free · no card required</div>
+      <div class="plan-hr"></div>
+      <div class="plan-feats">
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Up to 50 trades / month</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Basic trade journal</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Psychology check-ins</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>1 trading account</div>
+        <div class="pf no"><div class="pf-mark no"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Advanced analytics</div>
+        <div class="pf no"><div class="pf-mark no"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>AI Coach</div>
+        <div class="pf no"><div class="pf-mark no"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Prop firm dashboard</div>
+      </div>
+      <button class="plan-btn free-btn" onclick="scrollWL()">Get Started Free</button>
+    </div>
+    <div class="plan featured reveal" style="transition-delay:0.1s;">
+      <div class="plan-badge">MOST POPULAR</div>
+      <div class="plan-tier">Pro</div>
+      <div class="plan-price"><sup>$</sup>19</div>
+      <div class="plan-cadence">per month · billed monthly</div>
+      <div class="plan-hr"></div>
+      <div class="plan-feats">
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited trades</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Full analytics suite</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>AI Psychology Coach</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Prop firm dashboard</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Up to 3 accounts</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Finance engine</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Trade replay</div>
+      </div>
+      <button class="plan-btn pro-btn" onclick="scrollWL()">Join Waitlist — Pro</button>
+    </div>
+    <div class="plan reveal" style="transition-delay:0.2s;">
+      <div class="plan-tier">Elite</div>
+      <div class="plan-price"><sup>$</sup>35</div>
+      <div class="plan-cadence">per month · billed monthly</div>
+      <div class="plan-hr"></div>
+      <div class="plan-feats">
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Everything in Pro</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited accounts</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Mentor / team access</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Custom rule sets</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Priority support</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>API access</div>
+        <div class="pf yes"><div class="pf-mark yes"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>White label (coming)</div>
+      </div>
+      <button class="plan-btn elite-btn" onclick="scrollWL()">Join Waitlist — Elite</button>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section class="waitlist-wrap" id="waitlist">
+  <div class="waitlist-box reveal">
+    <h2 class="wl-title">Join the Waitlist</h2>
+    <p class="wl-sub">Be among the first traders to get access when we launch. Early members receive <strong>3 months Pro free</strong> — no catch.</p>
+    <div class="wl-form">
+      <input class="wl-email" type="email" id="wl-input" placeholder="your@email.com">
+      <button class="wl-submit" onclick="joinWL()">Get Early Access →</button>
+    </div>
+    <div class="wl-success" id="wl-success">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      You're on the list. We'll reach out before launch.
+    </div>
+    <p class="wl-fine">No spam. No credit card. <strong>Launching 2026.</strong></p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="footer-logo">
+    <div class="footer-mark">
+      <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    </div>
+    <span class="footer-edge">Edge</span><span class="footer-vara">Vara</span>
+  </a>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Use</a>
+    <a href="#">Contact</a>
+    <a href="mailto:hello@edgevara.io">hello@edgevara.io</a>
+  </div>
+  <div class="footer-copy">© 2026 EdgeVara. All rights reserved.</div>
+</footer>
+
+<script>
+// CURSOR
+const cur=document.getElementById('cur'),ring=document.getElementById('ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function tick(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(tick);})();
+document.querySelectorAll('a,button,.plan,.feat-cell').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.transform='translate(-50%,-50%) scale(1.6)';ring.style.borderColor='rgba(184,255,60,0.55)';});
+  el.addEventListener('mouseleave',()=>{ring.style.transform='translate(-50%,-50%) scale(1)';ring.style.borderColor='rgba(184,255,60,0.4)';});
+});
+
+// SCROLL REVEAL
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// WAITLIST
+function joinWL(){
+  const v=document.getElementById('wl-input').value;
+  if(!v||!v.includes('@'))return;
+  document.querySelector('.wl-form').style.display='none';
+  document.getElementById('wl-success').classList.add('show');
+  document.querySelector('.proof-txt strong').textContent='241+ traders';
+}
+function scrollWL(){document.getElementById('waitlist').scrollIntoView({behavior:'smooth'});}
+
+// SMOOTH SCROLL
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}
+  });
+});
+</script>
+</body>
+</html>
